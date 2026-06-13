@@ -766,9 +766,9 @@
 </div>
 
 <script>
-// API Configuration
-const API_URL = 'http://localhost:8000/ask';
-const HEALTH_URL = 'http://localhost:8000/health';
+// API Configuration - Use relative URLs for Hugging Face
+const API_URL = '/ask';
+const HEALTH_URL = '/health';
 
 // DOM Elements
 const chatMessages = document.getElementById('chatMessages');
@@ -840,7 +840,7 @@ async function askQuestion(question) {
     } catch (error) {
         console.error('API Error:', error);
         if (error.message.includes('Failed to fetch')) {
-            throw new Error('Cannot connect to API server. Please ensure:\n1. API server is running (python api.py)\n2. Server is running on port 8000');
+            throw new Error('Cannot connect to API server. Please refresh the page or try again later.');
         }
         throw error;
     }
@@ -858,12 +858,16 @@ async function checkSystemHealth() {
         } else {
             systemStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Needs Setup';
             systemStatus.style.color = '#f6ad55';
-            showSystemWarning('Chatbot system not ready. Please run "python main.py" and select option 1 to setup the system.');
+            // Don't show warning for initial load
+            if (data.message && !data.message.includes('ready')) {
+                showSystemWarning('Chatbot system is initializing. Please wait a moment...');
+            }
         }
     } catch (error) {
-        systemStatus.innerHTML = '<i class="fas fa-circle"></i> Offline';
-        systemStatus.style.color = '#fc8181';
-        showSystemWarning('Cannot connect to API server. Please start the server with: python api.py');
+        systemStatus.innerHTML = '<i class="fas fa-circle"></i> Connecting...';
+        systemStatus.style.color = '#f6ad55';
+        // Don't show error immediately, retry in a bit
+        setTimeout(checkSystemHealth, 3000);
     }
 }
 
@@ -878,7 +882,10 @@ function showSystemWarning(message) {
         <span>${message}</span>
         <button onclick="this.parentElement.remove()">Dismiss</button>
     `;
-    document.querySelector('.chat-header').after(warningDiv);
+    const chatHeader = document.querySelector('.chat-header');
+    if (chatHeader) {
+        chatHeader.after(warningDiv);
+    }
 }
 
 // Send message
@@ -901,7 +908,7 @@ async function sendMessage() {
         saveToHistory(question, response);
     } catch (error) {
         typingIndicator.style.display = 'none';
-        addMessage(error.message, 'bot', 0, true);
+        addMessage(error.message || 'Sorry, I encountered an error. Please try again.', 'bot', 0, true);
     }
 }
 
@@ -938,16 +945,25 @@ function addMessage(text, sender, sourcesCount = 0, isError = false) {
 function formatMessage(text) {
     let formatted = escapeHtml(text);
     formatted = formatted.replace(/\n/g, '<br>');
+    
+    // Bold text
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // Italic text
+    formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    
+    // Bullet points
     formatted = formatted.replace(/[•\-*]\s+(.+?)(?=<br>|$)/gm, '<li>$1</li>');
     if (formatted.includes('<li>') && !formatted.includes('<ul>')) {
         formatted = '<ul>' + formatted + '</ul>';
     }
+    
+    // Numbered lists
     formatted = formatted.replace(/(\d+)\.\s+(.+?)(?=<br>|$)/gm, '<li>$2</li>');
     if (formatted.includes('<li>') && !formatted.includes('<ul>') && !formatted.includes('<ol>')) {
         formatted = '<ol>' + formatted + '</ol>';
     }
-    formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    formatted = formatted.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    
     return formatted;
 }
 
@@ -1021,40 +1037,47 @@ function exportChat() {
 
 // Auto-resize textarea
 function autoResizeTextarea() {
-    userInput.addEventListener('input', function() {
-        this.style.height = 'auto';
-        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-    });
+    if (userInput) {
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+    }
 }
 
 // Setup event listeners
 function setupEventListeners() {
-    sendBtn.addEventListener('click', sendMessage);
-    clearChatBtn.addEventListener('click', clearChat);
-    exportChatBtn.addEventListener('click', exportChat);
+    if (sendBtn) sendBtn.addEventListener('click', sendMessage);
+    if (clearChatBtn) clearChatBtn.addEventListener('click', clearChat);
+    if (exportChatBtn) exportChatBtn.addEventListener('click', exportChat);
     
-    userInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
-        }
-    });
+    if (userInput) {
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    }
     
     document.querySelectorAll('.sample-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const question = btn.getAttribute('data-question');
-            userInput.value = question;
-            sendMessage();
+            if (userInput && question) {
+                userInput.value = question;
+                sendMessage();
+            }
         });
     });
 }
 
-// Initialize
+// Initialize on load
 document.addEventListener('DOMContentLoaded', () => {
     loadConversationHistory();
     setupEventListeners();
     autoResizeTextarea();
     checkSystemHealth();
+    // Check health every 30 seconds
     setInterval(checkSystemHealth, 30000);
 });
 </script>

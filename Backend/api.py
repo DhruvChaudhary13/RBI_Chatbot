@@ -1,11 +1,14 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from contextlib import asynccontextmanager
 from pydantic import BaseModel
 from typing import Optional
 import uvicorn
 import sys
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
 # Add current directory to path
@@ -16,7 +19,6 @@ load_dotenv()
 # Import your existing modules
 from Backend.main import setup_chatbot, rebuild_system
 from Backend.chatbot import RBI_Chatbot
-
 
 # Global chatbot instance
 chatbot = None
@@ -55,11 +57,22 @@ app = FastAPI(
 # Enable CORS for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For production, specify your frontend domain
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ============ SERVE FRONTEND ============
+# Get the frontend path
+frontend_path = Path(__file__).parent.parent / "Frontend"
+
+# Mount static files if frontend exists
+if frontend_path.exists():
+    app.mount("/static", StaticFiles(directory=str(frontend_path)), name="static")
+    print(f"✅ Frontend static files mounted from: {frontend_path}")
+else:
+    print(f"⚠️ Frontend folder not found at: {frontend_path}")
 
 # Request/Response Models
 class Question(BaseModel):
@@ -79,19 +92,42 @@ class SystemStatus(BaseModel):
     vector_store_loaded: bool
     message: Optional[str] = None
 
-# API Endpoints
+# ============ FRONTEND ENDPOINTS ============
 @app.get("/")
 async def root():
+    """Serve the frontend HTML or API info"""
+    index_path = frontend_path / "index.html"
+    if index_path.exists():
+        return FileResponse(str(index_path))
+    else:
+        # Fallback to API info if frontend not found
+        return {
+            "name": "RBI Regulatory Chatbot API",
+            "version": "1.0.0",
+            "status": "online",
+            "frontend_status": "Not deployed",
+            "endpoints": [
+                "/ask - POST (Ask questions)",
+                "/health - GET (Check system health)",
+                "/rebuild - POST (Rebuild vector database)",
+                "/status - GET (Get system status)"
+            ]
+        }
+
+# ============ API ENDPOINTS ============
+@app.get("/api")
+async def api_root():
+    """API information endpoint"""
     return {
         "name": "RBI Regulatory Chatbot API",
         "version": "1.0.0",
         "status": "online",
-        "endpoints": [
-            "/ask - POST (Ask questions)",
-            "/health - GET (Check system health)",
-            "/rebuild - POST (Rebuild vector database)",
-            "/status - GET (Get system status)"
-        ]
+        "endpoints": {
+            "ask": {"method": "POST", "path": "/ask", "description": "Ask a question"},
+            "health": {"method": "GET", "path": "/health", "description": "System health"},
+            "rebuild": {"method": "POST", "path": "/rebuild", "description": "Rebuild database"},
+            "status": {"method": "GET", "path": "/status", "description": "Detailed status"}
+        }
     }
 
 @app.get("/health", response_model=SystemStatus)
@@ -145,7 +181,7 @@ async def ask_question(question: Question):
         raise HTTPException(status_code=500, detail=f"Error processing question: {str(e)}")
 
 @app.post("/rebuild")
-async def rebuild_system():
+async def rebuild_system_endpoint():
     """Rebuild the entire vector database system"""
     global chatbot
     
@@ -182,7 +218,8 @@ async def get_status():
     status_info = {
         "chatbot_initialized": chatbot is not None,
         "vector_store_path": "./faiss_vector_db",
-        "vector_store_exists": os.path.exists("./faiss_vector_db")
+        "vector_store_exists": os.path.exists("./faiss_vector_db"),
+        "frontend_exists": frontend_path.exists()
     }
     
     if chatbot:
@@ -202,14 +239,14 @@ if __name__ == "__main__":
     print("=" * 60)
     print("Starting API server with your existing main.py...")
     print("API will be available at: http://localhost:8000")
+    print("Frontend will be available at: http://localhost:8000")
     print("API Docs: http://localhost:8000/docs")
     print("=" * 60)
     
     # Run with uvicorn
-    if __name__ == "__main__":
-      uvicorn.run(
-       "Backend.api:app",
+    uvicorn.run(
+        "Backend.api:app",
         host="0.0.0.0",
         port=int(os.environ.get("PORT", 7860)),
         reload=False
-        ) 
+    )
