@@ -151,14 +151,14 @@ async def rebuild_system():
     
     try:
         # Import rebuild function from main.py
-        from main import rebuild_system
+        from Backend.main import rebuild_system
         
         # Rebuild the system
         success = rebuild_system()
         
         if success:
             # Re-initialize chatbot after rebuild
-            from main import setup_chatbot
+            from Backend.main import setup_chatbot
             chatbot = setup_chatbot()
             
             return {
@@ -208,8 +208,8 @@ if __name__ == "__main__":
     # Run with uvicorn
     if __name__ == "__main__":
       uvicorn.run(
-        "chatbot.api:app",
+       "Backend.api:app",
         host="0.0.0.0",
-        port=int(os.environ.get("PORT", 8000)),
+        port=int(os.environ.get("PORT", 7860)),
         reload=False
-         )
+        ) 
