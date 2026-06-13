@@ -7,8 +7,8 @@ class Config:
     # API Keys - Only Groq needed
     GROQ_API_KEY = os.getenv("GROQ_API_KEY")
     
-    # PDF Path
-    PDF_PATH = "C:/Users/dhruv/OneDrive/Desktop/rbi_chatbot/RBI_Chatbot/Backend/rbi_textbook.pdf"
+    # PDF Path - CHANGED THIS LINE ONLY
+    PDF_PATH = "Backend/rbi_textbook.pdf"  # ← This works on Hugging Face
     
     # Vector Store - Using FAISS now
     VECTOR_STORE_PATH = "./faiss_vector_db"

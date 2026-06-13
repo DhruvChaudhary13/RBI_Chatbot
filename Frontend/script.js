@@ -1,5 +1,6 @@
 // API Configuration
-const API_URL = 'http://localhost:8000/ask';
+const API_URL = 'https://dhruv021-rbi-chatbot.hf.space/ask';
+const HEALTH_URL = 'https://dhruv021-rbi-chatbot.hf.space/health';
 
 // DOM Elements
 const chatMessages = document.getElementById('chatMessages');
