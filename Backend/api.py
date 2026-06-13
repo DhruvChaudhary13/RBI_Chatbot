@@ -14,8 +14,8 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 load_dotenv()
 
 # Import your existing modules
-from chatbot.main import setup_chatbot, rebuild_system
-from chatbot.chatbot import RBI_Chatbot
+from Backend.main import setup_chatbot, rebuild_system
+from Backend.chatbot import RBI_Chatbot
 
 
 # Global chatbot instance
