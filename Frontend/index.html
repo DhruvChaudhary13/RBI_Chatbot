@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>RBI Regulatory Chatbot | NBFC Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 320px;
+            height: 100vh;
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 30px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .logo i {
+            font-size: 32px;
+            color: #667eea;
+        }
+
+        .badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .info-section {
+            margin-bottom: 30px;
+        }
+
+        .info-section h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #a0aec0;
+        }
+
+        .info-section p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #cbd5e0;
+        }
+
+        .sample-questions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sample-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            text-align: left;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sample-btn i {
+            font-size: 14px;
+            color: #667eea;
+        }
+
+        .sample-btn:hover {
+            background: rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .features-list {
+            list-style: none;
+        }
+
+        .features-list li {
+            padding: 8px 0;
+            font-size: 13px;
+            color: #cbd5e0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .features-list li i {
+            color: #48bb78;
+            font-size: 12px;
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 12px;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: #48bb78;
+        }
+
+        .status i {
+            font-size: 10px;
+        }
+
+        .version {
+            color: #718096;
+            font-size: 11px;
+        }
+
+        /* Main Container */
+        .main-container {
+            margin-left: 320px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #f7fafc;
+        }
+
+        /* Chat Header */
+        .chat-header {
+            background: white;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-title h1 {
+            font-size: 24px;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .header-title p {
+            font-size: 14px;
+            color: #718096;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: #edf2f7;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #4a5568;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .action-btn:hover {
+            background: #e2e8f0;
+            transform: translateY(-1px);
+        }
+
+        /* Chat Messages Area */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Welcome Message */
+        .welcome-message {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 16px;
+            margin: 20px auto;
+            max-width: 600px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .welcome-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+        .welcome-icon i {
+            font-size: 40px;
+            color: white;
+        }
+
+        .welcome-message h2 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .welcome-message p {
+            color: #718096;
+            margin-bottom: 20px;
+        }
+
+        .feature-highlights {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .feature-highlights span {
+            background: #edf2f7;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #4a5568;
+        }
+
+        .feature-highlights span i {
+            color: #48bb78;
+            margin-right: 5px;
+        }
+
+        /* Message Bubbles */
+        .message {
+            display: flex;
+            gap: 12px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .user-message .message-avatar {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .user-message .message-avatar i {
+            color: white;
+            font-size: 16px;
+        }
+
+        .bot-message .message-avatar {
+            background: #2d3748;
+        }
+
+        .bot-message .message-avatar i {
+            color: white;
+            font-size: 16px;
+        }
+
+        .message-content {
+            flex: 1;
+            max-width: 70%;
+        }
+
+        .message-bubble {
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .user-message .message-bubble {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .bot-message .message-bubble {
+            background: white;
+            color: #2d3748;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .message-bubble.error {
+            background: #fed7d7 !important;
+            color: #c53030 !important;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #a0aec0;
+            margin-top: 5px;
+            margin-left: 5px;
+        }
+
+        .source-info {
+            margin-top: 8px;
+            font-size: 11px;
+            color: #a0aec0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .source-info i {
+            font-size: 10px;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            padding: 12px 20px;
+            background: white;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: fit-content;
+            margin-left: 20px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #a0aec0;
+            border-radius: 50%;
+            animation: typingAnimation 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingAnimation {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.5;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        .typing-indicator span {
+            font-size: 12px;
+            color: #718096;
+            margin-left: 5px;
+        }
+
+        /* Input Area */
+        .chat-input-container {
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            padding: 20px 30px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .input-wrapper textarea {
+            flex: 1;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: none;
+            max-height: 120px;
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-btn i {
+            color: white;
+            font-size: 18px;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-btn:active {
+            transform: translateY(0);
+        }
+
+        .input-info {
+            margin-top: 8px;
+            font-size: 11px;
+            color: #a0aec0;
+            text-align: center;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 101;
+            background: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-container {
+                margin-left: 0;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+            
+            .chat-header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+                padding: 15px 20px;
+            }
+            
+            .header-title h1 {
+                font-size: 18px;
+            }
+            
+            .chat-messages {
+                padding: 15px;
+            }
+            
+            .chat-input-container {
+                padding: 15px 20px;
+            }
+        }
+
+        /* System Warning */
+        .system-warning {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 12px 20px;
+            margin: 10px 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            animation: slideDown 0.3s ease;
+        }
+
+        .system-warning button {
+            margin-left: auto;
+            background: #c53030;
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .system-warning button:hover {
+            background: #9b2c2c;
+            transform: scale(1.05);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Message formatting */
+        .message-bubble ul, .message-bubble ol {
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .message-bubble li {
+            margin: 4px 0;
+        }
+
+        .message-bubble strong {
+            font-weight: 600;
+        }
+
+        .message-bubble em {
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Mobile Menu Button -->
+<button class="mobile-menu-btn" id="mobileMenuBtn">
+    <i class="fas fa-bars"></i>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="logo">
+            <i class="fas fa-landmark"></i>
+            <span>RBI Chatbot</span>
+        </div>
+        <div class="badge">AI-Powered</div>
+    </div>
+    
+    <div class="sidebar-content">
+        <div class="info-section">
+            <h3><i class="fas fa-info-circle"></i> About</h3>
+            <p>Expert assistant for RBI regulations and NBFC guidelines using advanced RAG technology with Llama 3.1 and FAISS vector database.</p>
+        </div>
+        
+        <div class="info-section">
+            <h3><i class="fas fa-question-circle"></i> Sample Questions</h3>
+            <div class="sample-questions">
+                <button class="sample-btn" data-question="What is a Non-Banking Financial Company (NBFC)?">
+                    <i class="fas fa-building"></i> What is NBFC?
+                </button>
+                <button class="sample-btn" data-question="What is the minimum net owned fund requirement for NBFCs?">
+                    <i class="fas fa-chart-line"></i> Minimum NOF requirement?
+                </button>
+                <button class="sample-btn" data-question="Is it mandatory for every NBFC to be registered with RBI?">
+                    <i class="fas fa-registered"></i> NBFC registration?
+                </button>
+                <button class="sample-btn" data-question="What are the different types of NBFCs?">
+                    <i class="fas fa-layer-group"></i> Types of NBFCs
+                </button>
+                <button class="sample-btn" data-question="What is Scale Based Regulatory Framework for NBFCs?">
+                    <i class="fas fa-chart-simple"></i> SBR Framework
+                </button>
+                <button class="sample-btn" data-question="What are the powers of RBI regarding NBFCs?">
+                    <i class="fas fa-gavel"></i> RBI powers over NBFCs
+                </button>
+                <button class="sample-btn" data-question="What is deposit and public deposit as per RBI guidelines?">
+                    <i class="fas fa-money-bill-wave"></i> Deposit definition
+                </button>
+                <button class="sample-btn" data-question="What does conducting financial activity as principal business mean?">
+                    <i class="fas fa-chart-pie"></i> Principal business criteria
+                </button>
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <h3><i class="fas fa-cogs"></i> Features</h3>
+            <ul class="features-list">
+                <li><i class="fas fa-check-circle"></i> Real-time responses</li>
+                <li><i class="fas fa-check-circle"></i> Source document tracking</li>
+                <li><i class="fas fa-check-circle"></i> Concise & accurate answers</li>
+                <li><i class="fas fa-check-circle"></i> RBI regulatory focus</li>
+                <li><i class="fas fa-check-circle"></i> 24/7 availability</li>
+                <li><i class="fas fa-check-circle"></i> Chat history export</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="sidebar-footer">
+        <div class="status" id="systemStatus">
+            <i class="fas fa-circle"></i> Checking...
+        </div>
+        <div class="version">Powered by Llama 3.1 | FAISS | Groq</div>
+    </div>
+</div>
+
+<!-- Main Chat Area -->
+<div class="main-container">
+    <div class="chat-header">
+        <div class="header-title">
+            <h1><i class="fas fa-comments"></i> RBI Regulatory Assistant</h1>
+            <p>Get accurate answers about RBI regulations and NBFC guidelines</p>
+        </div>
+        <div class="header-actions">
+            <button id="clearChatBtn" class="action-btn">
+                <i class="fas fa-trash-alt"></i> Clear Chat
+            </button>
+            <button id="exportChatBtn" class="action-btn">
+                <i class="fas fa-download"></i> Export
+            </button>
+        </div>
+    </div>
+    
+    <!-- Chat Messages -->
+    <div class="chat-messages" id="chatMessages">
+        <div class="welcome-message">
+            <div class="welcome-icon">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h2>Welcome to RBI Regulatory Chatbot</h2>
+            <p>Ask me anything about RBI regulations, NBFCs, banking guidelines, and financial compliance.</p>
+            <div class="feature-highlights">
+                <span><i class="fas fa-check"></i> Instant Answers</span>
+                <span><i class="fas fa-check"></i> Source Verified</span>
+                <span><i class="fas fa-check"></i> 24/7 Available</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Typing Indicator -->
+    <div class="typing-indicator" id="typingIndicator" style="display: none;">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <span>RBI Assistant is thinking...</span>
+    </div>
+    
+    <!-- Input Area -->
+    <div class="chat-input-container">
+        <div class="input-wrapper">
+            <textarea 
+                id="userInput" 
+                placeholder="Ask me about RBI regulations, NBFC requirements, compliance guidelines..."
+                rows="1"
+            ></textarea>
+            <button id="sendBtn" class="send-btn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+        <div class="input-info">
+            <i class="fas fa-info-circle"></i> Press Enter to send, Shift+Enter for new line
+        </div>
+    </div>
+</div>
+
+<script>
+// API Configuration
+const API_URL = 'http://localhost:8000/ask';
+const HEALTH_URL = 'http://localhost:8000/health';
+
+// DOM Elements
+const chatMessages = document.getElementById('chatMessages');
+const userInput = document.getElementById('userInput');
+const sendBtn = document.getElementById('sendBtn');
+const clearChatBtn = document.getElementById('clearChatBtn');
+const exportChatBtn = document.getElementById('exportChatBtn');
+const typingIndicator = document.getElementById('typingIndicator');
+const sidebar = document.getElementById('sidebar');
+const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+const systemStatus = document.getElementById('systemStatus');
+
+// Chat State
+let conversationHistory = [];
+
+// Mobile menu toggle
+if (mobileMenuBtn) {
+    mobileMenuBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+    });
+}
+
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', (e) => {
+    if (window.innerWidth <= 768) {
+        if (!sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+            sidebar.classList.remove('open');
+        }
+    }
+});
+
+// Generate session ID
+function getSessionId() {
+    let sessionId = localStorage.getItem('chat_session_id');
+    if (!sessionId) {
+        sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('chat_session_id', sessionId);
+    }
+    return sessionId;
+}
+
+// API call function
+async function askQuestion(question) {
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                question: question,
+                session_id: getSessionId()
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        return {
+            answer: data.answer,
+            sources_count: data.sources_count,
+            has_sources: data.has_sources,
+            response_time: data.response_time
+        };
+        
+    } catch (error) {
+        console.error('API Error:', error);
+        if (error.message.includes('Failed to fetch')) {
+            throw new Error('Cannot connect to API server. Please ensure:\n1. API server is running (python api.py)\n2. Server is running on port 8000');
+        }
+        throw error;
+    }
+}
+
+// Check system health
+async function checkSystemHealth() {
+    try {
+        const response = await fetch(HEALTH_URL);
+        const data = await response.json();
+        
+        if (data.chatbot_ready) {
+            systemStatus.innerHTML = '<i class="fas fa-circle"></i> System Online';
+            systemStatus.style.color = '#48bb78';
+        } else {
+            systemStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Needs Setup';
+            systemStatus.style.color = '#f6ad55';
+            showSystemWarning('Chatbot system not ready. Please run "python main.py" and select option 1 to setup the system.');
+        }
+    } catch (error) {
+        systemStatus.innerHTML = '<i class="fas fa-circle"></i> Offline';
+        systemStatus.style.color = '#fc8181';
+        showSystemWarning('Cannot connect to API server. Please start the server with: python api.py');
+    }
+}
+
+function showSystemWarning(message) {
+    const existingWarning = document.querySelector('.system-warning');
+    if (existingWarning) existingWarning.remove();
+    
+    const warningDiv = document.createElement('div');
+    warningDiv.className = 'system-warning';
+    warningDiv.innerHTML = `
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()">Dismiss</button>
+    `;
+    document.querySelector('.chat-header').after(warningDiv);
+}
+
+// Send message
+async function sendMessage() {
+    const question = userInput.value.trim();
+    if (!question) return;
+    
+    userInput.value = '';
+    userInput.style.height = 'auto';
+    
+    addMessage(question, 'user');
+    
+    typingIndicator.style.display = 'flex';
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    try {
+        const response = await askQuestion(question);
+        typingIndicator.style.display = 'none';
+        addMessage(response.answer, 'bot', response.sources_count);
+        saveToHistory(question, response);
+    } catch (error) {
+        typingIndicator.style.display = 'none';
+        addMessage(error.message, 'bot', 0, true);
+    }
+}
+
+// Add message to chat
+function addMessage(text, sender, sourcesCount = 0, isError = false) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${sender}-message`;
+    
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    
+    messageDiv.innerHTML = `
+        <div class="message-avatar">
+            <i class="fas ${sender === 'user' ? 'fa-user' : 'fa-robot'}"></i>
+        </div>
+        <div class="message-content">
+            <div class="message-bubble ${isError ? 'error' : ''}">
+                ${formatMessage(text)}
+            </div>
+            <div class="message-time">${time}</div>
+            ${sender === 'bot' && sourcesCount > 0 && !isError ? `
+                <div class="source-info">
+                    <i class="fas fa-database"></i>
+                    Based on ${sourcesCount} relevant document${sourcesCount > 1 ? 's' : ''}
+                </div>
+            ` : ''}
+        </div>
+    `;
+    
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Format message
+function formatMessage(text) {
+    let formatted = escapeHtml(text);
+    formatted = formatted.replace(/\n/g, '<br>');
+    formatted = formatted.replace(/[•\-*]\s+(.+?)(?=<br>|$)/gm, '<li>$1</li>');
+    if (formatted.includes('<li>') && !formatted.includes('<ul>')) {
+        formatted = '<ul>' + formatted + '</ul>';
+    }
+    formatted = formatted.replace(/(\d+)\.\s+(.+?)(?=<br>|$)/gm, '<li>$2</li>');
+    if (formatted.includes('<li>') && !formatted.includes('<ul>') && !formatted.includes('<ol>')) {
+        formatted = '<ol>' + formatted + '</ol>';
+    }
+    formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    formatted = formatted.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    return formatted;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Save to localStorage
+function saveToHistory(question, response) {
+    conversationHistory.unshift({
+        question: question,
+        answer: response.answer,
+        timestamp: new Date().toISOString(),
+        sources: response.sources_count
+    });
+    if (conversationHistory.length > 50) conversationHistory = conversationHistory.slice(0, 50);
+    localStorage.setItem('chatHistory', JSON.stringify(conversationHistory));
+}
+
+function loadConversationHistory() {
+    const saved = localStorage.getItem('chatHistory');
+    if (saved) conversationHistory = JSON.parse(saved);
+}
+
+// Clear chat
+function clearChat() {
+    if (confirm('Are you sure you want to clear all messages?')) {
+        chatMessages.innerHTML = `
+            <div class="welcome-message">
+                <div class="welcome-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h2>Welcome to RBI Regulatory Chatbot</h2>
+                <p>Ask me anything about RBI regulations, NBFCs, banking guidelines, and financial compliance.</p>
+                <div class="feature-highlights">
+                    <span><i class="fas fa-check"></i> Instant Answers</span>
+                    <span><i class="fas fa-check"></i> Source Verified</span>
+                    <span><i class="fas fa-check"></i> 24/7 Available</span>
+                </div>
+            </div>
+        `;
+        localStorage.removeItem('chatHistory');
+        conversationHistory = [];
+    }
+}
+
+// Export chat
+function exportChat() {
+    const messages = Array.from(document.querySelectorAll('.message')).map(msg => {
+        const sender = msg.classList.contains('user-message') ? 'User' : 'RBI Assistant';
+        const text = msg.querySelector('.message-bubble').innerText;
+        const time = msg.querySelector('.message-time').innerText;
+        return `[${time}] ${sender}: ${text}`;
+    }).join('\n\n');
+    
+    if (messages.length === 0) {
+        alert('No messages to export');
+        return;
+    }
+    
+    const blob = new Blob([messages], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `rbi-chat-export-${new Date().toISOString().slice(0,19)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// Auto-resize textarea
+function autoResizeTextarea() {
+    userInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+}
+
+// Setup event listeners
+function setupEventListeners() {
+    sendBtn.addEventListener('click', sendMessage);
+    clearChatBtn.addEventListener('click', clearChat);
+    exportChatBtn.addEventListener('click', exportChat);
+    
+    userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+    
+    document.querySelectorAll('.sample-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const question = btn.getAttribute('data-question');
+            userInput.value = question;
+            sendMessage();
+        });
+    });
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    loadConversationHistory();
+    setupEventListeners();
+    autoResizeTextarea();
+    checkSystemHealth();
+    setInterval(checkSystemHealth, 30000);
+});
+</script>
+</body>
+</html>

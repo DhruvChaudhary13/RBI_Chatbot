@@ -19,7 +19,7 @@ class RBI_Chatbot:
                 max_tokens=800,  #  to prevent rambling
                 top_p=0.9  #  to reduce repetition
             )
-            print("Groq LLM initialized successfully with llama-3.1-8b-instant")
+            print(f"Groq LLM initialized successfully with {self.llm.model_name}")
         except Exception as e:
             print(f"Error initializing Groq LLM: {e}")
             raise

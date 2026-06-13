@@ -1,3 +1,4 @@
+
 from data_processing import DataProcessor
 from vector_store import VectorStoreManager
 from chatbot import RBI_Chatbot
@@ -5,6 +6,9 @@ from add_definitions import add_standard_definitions
 from config import Config
 import os
 import shutil
+
+# Global variable to track if system is initialized
+_system_initialized = False
 
 def setup_chatbot():
     """Setup the complete chatbot system with FAISS vector database"""
@@ -32,6 +36,8 @@ def setup_chatbot():
     
     try:
         chatbot = RBI_Chatbot()
+        global _system_initialized
+        _system_initialized = True
         print("Chatbot setup completed with FAISS Vector Database")
         return chatbot
     except Exception as e:
@@ -89,20 +95,25 @@ def test_system():
     else:
         print("FAISS Vector Database: NOT WORKING")
 
+def is_system_ready():
+    """Check if system is ready for API usage"""
+    global _system_initialized
+    return _system_initialized and os.path.exists("./faiss_vector_db")
+
 def main():
-    """Main function"""
+    """Main function with API server option"""
     print("=" * 60)
     print("           RBI NBFC CHATBOT (FAISS + Groq)")
     print("=" * 60)
-    
     
     print("\n1. Setup/Rebuild System")
     print("2. Chat Interface") 
     print("3. Test System")
     print("4. Add Definitions Only")
-    print("5. Exit")
+    print("5. Start API Server")  # New option
+    print("6. Exit")
     
-    choice = input("\nChoose option (1-5): ")
+    choice = input("\nChoose option (1-6): ")
     
     if choice == "1":
         if rebuild_system():
@@ -126,6 +137,21 @@ def main():
             print(f"Failed to add definitions: {e}")
     
     elif choice == "5":
+        print("\nStarting API Server...")
+        print("This will start the FastAPI server on port 8000")
+        print("You can then use the frontend to interact with the chatbot")
+        print("Press Ctrl+C to stop the server\n")
+        
+        try:
+            import subprocess
+            subprocess.run(["python", "api.py"])
+        except KeyboardInterrupt:
+            print("\nAPI Server stopped")
+        except Exception as e:
+            print(f"Error starting API server: {e}")
+            print("Make sure fastapi and uvicorn are installed: pip install fastapi uvicorn")
+    
+    elif choice == "6":
         print("Goodbye")
     
     else:
