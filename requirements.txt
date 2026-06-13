@@ -17,3 +17,5 @@ python-dotenv==1.0.0
 
 pydantic==2.9.2
 numpy<2
+
+PyPDF2
