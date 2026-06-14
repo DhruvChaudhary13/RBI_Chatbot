@@ -1,13 +1,12 @@
 FROM python:3.11
 
-WORKDIR /app    // this is the root directory inside the container which will contain the entrire project 
+WORKDIR /app  
 
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . . // this command copies the entire local project directory to the current working directory in the container (which is /app)
-
+COPY . .
 
 EXPOSE 7860
 
