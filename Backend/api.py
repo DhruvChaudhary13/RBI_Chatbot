@@ -25,7 +25,7 @@ chatbot = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
+    # Startup-0x
     global chatbot
     print("🚀 Starting up RBI Chatbot API...")
     
