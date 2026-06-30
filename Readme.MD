@@ -1,8 +1,8 @@
 ---
-title: RBI Chatbot
-emoji: 🏦
-colorFrom: blue
-colorTo: indigo
+title: RBI CHATBOT
+emoji: 🏃
+colorFrom: gray
+colorTo: green
 sdk: docker
 pinned: false
 ---
