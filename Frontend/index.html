@@ -766,9 +766,22 @@
 </div>
 
 <script>
-// API Configuration - Use relative URLs for Hugging Face
-const API_URL = '/ask';
-const HEALTH_URL = '/health';
+// // API Configuration - Use relative URLs for Hugging Face
+// const API_URL = '/ask';
+// const HEALTH_URL = '/health';
+
+// API Configuration - Works for both local and deployed
+// Detect if we're running locally or in production
+const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+// Set the base URL
+const BASE_URL = isLocal ? 'http://localhost:7860' : '';
+const API_URL = `${BASE_URL}/ask`;
+const HEALTH_URL = `${BASE_URL}/health`;
+
+console.log('Environment:', isLocal ? 'Local' : 'Production');
+console.log('API URL:', API_URL);
+
 
 // DOM Elements
 const chatMessages = document.getElementById('chatMessages');
