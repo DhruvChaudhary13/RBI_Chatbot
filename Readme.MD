@@ -1,6 +1,20 @@
+---
+title: RBI Chatbot
+emoji: 🏦
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+---
+
+
+
+
+
 # 🏦 RBI Chatbot
 
 An AI-powered Retrieval-Augmented Generation (RAG) chatbot that answers RBI-related queries using semantic search and document retrieval.
+
 
 ## 🚀 Live Demo
 
